@@ -4,7 +4,7 @@
 
 %%
 
-function [J_p] = Jacobian_Matrix_ASM4()
+function [J_p,J] = Jacobian_Matrix_ASM4()
 sympref('FloatingPointOutput',true);
 syms d1 d2 d3 d4 Q1 Q2 Q3 Q4 real
 

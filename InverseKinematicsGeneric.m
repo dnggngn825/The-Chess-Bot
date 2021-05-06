@@ -93,7 +93,7 @@ qFinalSolution = [];
     
     filter_Q = [];
     for i = 1: length(qFinalSolution(:,1))
-        if (qFinalSolution(i,2) >= 0 && qFinalSolution(i,3) <= 0 )
+        if (qFinalSolution(i,2) >= 0 && qFinalSolution(i,3) <= 0 && qFinalSolution(i,4) <= 0)
             filter_Q(end+1,:) = qFinalSolution(i,:);
         end
     end

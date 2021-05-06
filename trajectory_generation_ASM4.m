@@ -13,13 +13,14 @@
 % poseRef will store the pose as each column in the array
 % velRef will store the velocity as each column in the array
 
-function [poseRef, velRef, thetaRef, thetaDotRef] = trajectory_generation_ASM4(points, t_i, t_f)
+function [poseRef, velRef, thetaRef, thetaDotRef,omegaOnAxis] = trajectory_generation_ASM4(points, t_i, t_f)
 
 no_segments = length(points(1,:))-1;
 time = getTimeArray(points,t_i, t_f);
 poseRef = [];velRef = [];
 thetaDotRef = [];
 thetaRef = [];
+omegaOnAxis = [];
 
 % Find segments for trajectories
 for i = 1:no_segments
@@ -31,12 +32,20 @@ for i = 1:no_segments
     poseRef = [poseRef, [xAndvWTime(1,:,1);xAndvWTime(2,:,1);xAndvWTime(3,:,1)]];
     velRef = [velRef, [xAndvWTime(1,:,2);xAndvWTime(2,:,2);xAndvWTime(3,:,2)]];
     [phi_coeff(i,:),phi_omega_time(i,:,:), k_hat(:,i), R_t_array(i,:,:,:)] = InterpolatingOrientation(points(:,i),points(:,i+1),time(i),time(i+1));
-    thetaDotRef = [thetaDotRef, phi_omega_time(1,:,2)];
-    if (size(thetaRef) ~= 0)
-        thetaRef = [thetaRef, thetaRef(end)*ones(size(phi_omega_time(1,:,1))) + phi_omega_time(1,:,1)];
-    else
-        thetaRef = [phi_omega_time(1,:,1)];
+    thetaDotRef = [thetaDotRef, phi_omega_time(i,:,2)];
+    
+    for omega = phi_omega_time(i,:,2)
+        omegaOnAxis(:,end+1) = omega*k_hat(:,i) ;
     end
+    
+    if (size(thetaRef) ~= 0)
+        thetaRef = [thetaRef, thetaRef(end)*ones(size(phi_omega_time(i,:,1))) + phi_omega_time(i,:,1)];
+    else
+        thetaRef = [phi_omega_time(i,:,1)];
+    end
+    
+    
+    
 end
 
 

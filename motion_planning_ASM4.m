@@ -14,8 +14,10 @@
 
 % this will return a struct of each segment
 
-function trajectory = motion_planning_ASM4(startPoint,endPoint)
+function trajectory = motion_planning_ASM4(Square)
 
+startPoint = Square.startSq;
+endPoint = Square.endSq;
 [pStart, pEnd] = ChessBoardLocation(startPoint,endPoint);
 
 via_points = [[pStart(1:2);pStart(3)+100],...
@@ -39,9 +41,9 @@ set2.t_i = 0;set2.t_f = 5;
 set3.t_i = 0;set3.t_f = 5;
 
 % traj gen from the set points #
-[set1.poseRef, set1.velRef, set1.thetaRef, set1.thetaDotRef] = trajectory_generation_ASM4(set1.setPoints, set1.t_i, set1.t_f);
-[set2.poseRef, set2.velRef, set2.thetaRef, set2.thetaDotRef] = trajectory_generation_ASM4(set2.setPoints, set2.t_i, set2.t_f);
-[set3.poseRef, set3.velRef, set3.thetaRef, set3.thetaDotRef] = trajectory_generation_ASM4(set3.setPoints, set3.t_i, set3.t_f);
+[set1.poseRef, set1.velRef, set1.thetaRef, set1.thetaDotRef, set1.omegaOnAxis] = trajectory_generation_ASM4(set1.setPoints, set1.t_i, set1.t_f);
+[set2.poseRef, set2.velRef, set2.thetaRef, set2.thetaDotRef, set2.omegaOnAxis] = trajectory_generation_ASM4(set2.setPoints, set2.t_i, set2.t_f);
+[set3.poseRef, set3.velRef, set3.thetaRef, set3.thetaDotRef, set3.omegaOnAxis] = trajectory_generation_ASM4(set3.setPoints, set3.t_i, set3.t_f);
 
 % combine them into one struct
 trajectory.segment1 = set1;

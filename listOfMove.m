@@ -9,7 +9,7 @@
 % this function return the start and end square on the board, as indicating
 % in table 1 of the asm4
 
-function [startSq, endSq] = listOfMove(i)
+function Square = listOfMove(i)
 
 list = [['e2','e4'];...
           ['g1','f3'];...
@@ -37,7 +37,7 @@ list = [['e2','e4'];...
           ['c1','d1'];...
           ['f1','e1']];
       
-startSq = list(i,1:2);
-endSq = list(i,3:4);
+Square.startSq = list(i,1:2);
+Square.endSq = list(i,3:4);
 
 end

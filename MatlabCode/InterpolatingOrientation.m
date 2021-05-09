@@ -38,7 +38,8 @@ function [phi_coeff,phi_omega_time, k_hat,R_t_array] = InterpolatingOrientation(
             2*(e1*e2+e3*e4) 1-2*e1^2-2*e3^2 2*(e2*e3-e1*e4);...
             2*(e1*e3 -e2*e4) 2*(e2*e3 + e1*e4) 1-2*e1^2-2*e2^2];
         
-        R_t_array(i,:,:) =R_i_0* R;
+        % omega, row, col
+        R_t_array(i).matrix =R_i_0* R;
     end
     
 end

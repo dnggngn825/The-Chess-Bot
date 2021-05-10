@@ -19,6 +19,7 @@ Q3 = sym('Q3');
 % r= r2;
 
 [d1,d2,d3,d4,motorWidth,bigMotorRange, smallMotorRange, minAngle] = RobotSpec();
+[d1,d2,d3,d4] =  RobotSpec_Assembly();
 
 % Solve for Q1
 q1 = atan(r(2)/r(1));

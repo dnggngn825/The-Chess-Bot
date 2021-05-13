@@ -33,7 +33,9 @@ Joint4Pose_E = [0 0 -d4 1]';
 R_Eto0 = [cos(q1) sin(q1) 0;...
                 sin(q1) -cos(q1) 0;...
                 0 0 -1];
+            
 T_Eto0 = [R_Eto0 r(1:3); 0 0 0 1];
+
 Joint4Pose_1 = T_0to1*T_Eto0*Joint4Pose_E;
 xe = Joint4Pose_1(1);ze = Joint4Pose_1(3);
 eqn1 = xe^2 + ze^2 - d2^2 -d3^2 + 2*d2*d3*cos(pi-Q3) == 0;

@@ -11,7 +11,7 @@ eqns =[ x0 == var*subs(time,t_i), x0_dot == var(2:4)*subs(time_dot,t_i),xf == va
 sol = solve(eqns,var);
 arrayOfcoeffa = [sol.a0,sol.a1,sol.a2,sol.a3];
 j = 1;
-for i = linspace(t_i,t_f,11)
+for i = linspace(t_i,t_f,6)
     xtime = subs(time,i);
     vtime = subs(time_dot,i);
     xAndvWTime(j,:) = [arrayOfcoeffa*xtime, arrayOfcoeffa(2:4)*vtime,i];  % x, displacement

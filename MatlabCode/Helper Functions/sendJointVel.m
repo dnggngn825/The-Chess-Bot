@@ -28,11 +28,12 @@ function sendJointVel(s, jointVel, numMotors)
     
     % Send drive motor command
     fprintf(s, '%s', 'vel\n');
+    fprintf(s, '%s', 'vel\n');
 
     % Send joint velocities individually
     
     for i=1:numMotors
-        fprintf(s, '%s', num2str(jointVel(i)) + "e");
+        fprintf(s, '%s', num2str(jointVel(i), '%.5f') + "e");
     end
     
     % wait for arduino ack

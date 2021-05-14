@@ -28,10 +28,11 @@ function [fb, e] = readFB(s, numMotors)
     % @ readSerial()        - Read data sent by Arduino over serial.
     
     % Send position read command to Arduino
-    fprintf(s, '%s', 'fbk\n');          
+    fprintf(s, '%s', 'fbk\n');
+    fprintf(s, '%s', 'fbk\n'); 
 
     % Convert Motor Encoder Data To Radians
-    SCS15_2_RAD = 0.00378505;
+    SCS15_2_RAD = 0.00366450;
     SCS009_2_RAD = 0.00511327;
     
     % Read motor feedback in SCS format

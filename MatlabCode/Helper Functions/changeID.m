@@ -1,5 +1,4 @@
-
-% sendJointPos.m
+% setPID.m
 % --------------------------
 % Licenting Information: You are free to use or extend this project
 % for educational purposes provided that (1) you do not distribute or
@@ -14,26 +13,18 @@
 % (nathan.batham@unimelb.edu.au)
 
 
-function sendJointPos(s, jointPos, numMotors)
+function changeID(s, oldID, newID)
     
-    % Send joint velocities to Arduino over serial. This is done by
-    % first converting the floats to a string and then adding a
-    % terminating non-numeric string character.
-    
-    % External Variables
-    % @ s                   - Serial object.
-    % @ jointVel            - Vector of joint velocites to be sent
-    %                   to each motor in rad/s.
-    
-    
-    % Send drive motor command
-    fprintf(s, '%s', 'pos\n');
-    fprintf(s, '%s', 'pos\n');
-
-    % Send joint velocities individually
-    for i=1:numMotors
-        fprintf(s, '%s', num2str(jointPos(i), '%.5f') + "e");
+    if s.BytesAvailable > 0
+        fread(s, s.BytesAvailable)
     end
+
+    % Send change ID command
+    fprintf(s, '%s', 'cid\n');
+    
+    fprintf(s, '%s', num2str(oldID) + "e");
+    fprintf(s, '%s', num2str(newID) + "e");
+    
     
     % wait for arduino ack
     while ( fread(s, 1, 'uchar') ~= 'd' ) 

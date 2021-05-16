@@ -20,12 +20,12 @@ startPoint = Square.startSq;
 endPoint = Square.endSq;
 [pStart, pEnd] = ChessBoardLocation(startPoint,endPoint);
 
-via_points = [[pStart(1:2);pStart(3)+120],...
-                        [pEnd(1:2);pEnd(3)+120]];     % Each column is one via point
+via_points = [[pStart(1:2);pStart(3)+120]/1000,...
+                        [pEnd(1:2);pEnd(3)+120]/1000];     % Each column is one via point
 
 [pHome,~] = ChessBoardLocation('home','home');
 % interPoint = [pHome(1:2);pHome(3)-100];
-interPoint = [400;0;200];
+interPoint = [400;0;200]/1000;
 
 % construct the sets of points for finishing the task
 set1.setPoints = [pHome, via_points(:,1), pStart];

@@ -80,8 +80,8 @@ plot(endEffectorPoseRangeZ90(:,1),endEffectorPoseRangeZ90(:,2),'.','color','k');
 axis('equal');
 xlabel('x (mm)');ylabel('y (mm)');
 title('Top View of end-effector in XY plane at z = 90 mm');
-xlim([-100 400]);
-ylim([-250 250]);
+% xlim([-100 400]);
+% ylim([-250 250]);
 
 for t = 1:9
 line([X_chess+width_chess*(t-1)/8 X_chess+width_chess*(t-1)/8],[-width_chess/2 -width_chess/2+width_chess],'color','b','LineWidth',2)
@@ -94,8 +94,8 @@ plot(endEffectorPoseRangeZ20(:,1),endEffectorPoseRangeZ20(:,2),'.','color','r');
 axis('equal');
 xlabel('x (mm)');ylabel('y (mm)');
 title('Top View of end-effector in XY plane at z = 20 mm');
-xlim([-100 400]);
-ylim([-250 250]);
+% xlim([-100 400]);
+% ylim([-250 250]);
 
 for t = 1:9
 line([X_chess+width_chess*(t-1)/8 X_chess+width_chess*(t-1)/8],[-width_chess/2 -width_chess/2+width_chess],'color','b','LineWidth',2)
@@ -117,8 +117,8 @@ plot([0;0;0;d3;d3],...
 xlabel('x (mm)');ylabel('z (mm)');
 title('Working range of end-effector in frame 1 in XZ plane');
 legend("Pose",  "Robot Arm",  "Chessboard",'Initial position');
-xlim([-100 400]);
-ylim([-200 400]);
+% xlim([-100 400]);
+% ylim([-200 400]);
 axis('equal');
 
 
@@ -131,8 +131,8 @@ line([X_chess X_chess+width_chess],[Y_chess Y_chess],'color','b','LineWidth',2)
 xlabel('x (mm)');ylabel('z (mm)');
 title('Initial position of the end-effector');
 legend("Robot Arm", "Chessboard");
-xlim([-50 300]);
-ylim([-50 250]);
+% xlim([-50 300]);
+% ylim([-50 250]);
 
 
 

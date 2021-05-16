@@ -29,4 +29,5 @@ function [d1,d2,d3,d4,motorWidth, bigMotorRange, smallMotorRange, minAngle] = Ro
 
     d2 = d2 + motorWidth;
     d3 = d3 + motorWidth;
+    d1 = d1/1000;d2 = d2/1000;d3 = d3/1000;d4 = d4/1000;
 end

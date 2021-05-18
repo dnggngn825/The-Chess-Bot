@@ -16,7 +16,7 @@ xref = [solveForSplineOne(x0(1),xf(1),v0(1),vf(1),t_i,t_f);...
         sol = solve(eqns,var);
         arrayOfcoeffa = [sol.a0,sol.a1,sol.a2,sol.a3];
         
-       for i = linspace(t_i,t_f,3)
+       for i = linspace(t_i,t_f,11)
             vtime = subs(time_dot,i);
             if ((i ~= t_i) && (i~= t_f))
                 v = arrayOfcoeffa(2:4)*vtime;

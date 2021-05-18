@@ -1,4 +1,4 @@
-%% Robotics System Assignment 4 Matlab Code
+    %% Robotics System Assignment 4 Matlab Code
 
 %   The University of Melbourne
 %   MCEN90028 ROBOTICS SYSTEMS
@@ -31,7 +31,7 @@ for i = 1:no_segments
         
     end
     poseRef = [poseRef, [xAndvWTime(1,:,1);xAndvWTime(2,:,1);xAndvWTime(3,:,1)]];
-    poseRef = round(poseRef,3);
+%     poseRef = round(poseRef,3);
     velRef = [velRef, [xAndvWTime(1,:,2);xAndvWTime(2,:,2);xAndvWTime(3,:,2)]];
     velRef = round(velRef,3);
     [phi_coeff(i,:),phi_omega_time(i,:,:), k_hat(:,i), R] = InterpolatingOrientation(points(:,i),points(:,i+1),time(i),time(i+1));

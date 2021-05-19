@@ -20,8 +20,8 @@ startPoint = Square.startSq;
 endPoint = Square.endSq;
 [pStart, pEnd] = ChessBoardLocation(startPoint,endPoint);
 
-via_points = [[pStart(1:2);pStart(3)+0.12],...
-                        [pEnd(1:2);pEnd(3)+0.12]];     % Each column is one via point
+via_points = [[pStart(1:2);pStart(3)+0.08],...
+                        [pEnd(1:2);pEnd(3)+0.10]];     % Each column is one via point
 
 [pHome,~] = ChessBoardLocation('home','home');
 % interPoint = [pHome(1:2);pHome(3)-100];

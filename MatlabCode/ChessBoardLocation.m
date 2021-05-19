@@ -5,7 +5,11 @@ function [XI,XF] = ChessBoardLocation(start,final)
 default = [260;140;50];
 corner = 'a1';
 heightStart = 80;
-heightEnd = 150;
+if (final(2) - start(2) > 2)
+    heightEnd = 110;
+else
+    heightEnd = heightStart;
+end
 
 if (strcmp(start,'home'))
     XI = [300;0;310]/1000;
@@ -25,6 +29,6 @@ elseif (strcmp(final,'home'))
 else
     XF = [default(1)+(final(2)-corner(2))*40;...
             default(2)-(final(1)-corner(1))*40;...
-            20*(final(2)-corner(2))+80]/1000;
+            heightEnd]/1000;
 end
 end

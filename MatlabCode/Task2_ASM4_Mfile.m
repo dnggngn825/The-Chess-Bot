@@ -76,7 +76,7 @@ port = 'COM5';                                % Windows Port Structure - ONLY EX
 
 % Setup Serial Connection
 baudrate = 230400;
-fclose(s);
+% fclose(s);
 s = establishSerial(port, baudrate);
 % s = serialport(port, baudrate);
 
@@ -92,7 +92,7 @@ changeMotorID = false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%
-angleError = [0,20,7,10]*pi/180;
+angleError = [-5,20,7,10]*pi/180;
 
 % Read joystick input
 [xJoy, yJoy, eJoy] = readJoy(s);
@@ -118,8 +118,8 @@ Q           = InverseKinematicsGeneric([300;0;310]/1000);
 homeMotorQ  = fixAngleToMotorFB(Q);
 
 % define the angle of the grippper
-gripper.closeQ  = 0.45;
-gripper.openQ   = -0.24;
+gripper.closeQ  = 0.59;
+gripper.openQ   = -0.67;
 gripper.Q       = gripper.openQ; % as default
 
 %%
@@ -131,8 +131,9 @@ sendJointPos(s,[gripper.openQ], 1);
 
 %%
 setControlMode(s, "velocity");
-
-% sendJointVel(s, [round(double(Q_cmd_dot_motor'),3), 0], numID);
+sendJointVel(s, [0,0, 0, 0,0], numID);
+%%
+sendJointPos(s, [-pi/36,0, -pi/4,-pi/2], numID);
 
 %%
 % This is where you will write a sequence to send all of your joints to their home positions.
@@ -150,26 +151,32 @@ movementType = 'x';
 if (movementType == 'x')
 %     controller.Kp = 0.02*diag([2, 5, 2, 10, 25, 10]) ;      % tr (x, y, z), orie (x, y, z)
 %         controller.Kp = 0.04*diag([0, 5, 0, 0, 25, 10]) ; controller.Ki = 0.3*controller.Kp;        % stable but easily pose to disturbances
-        controller.Kp = 0.02*[2.2, 3, 0.35, 2, 4, 2]';         
+%         controller.Kp = 3*[2.2, 3, 0.35, 2, 4, 2]';   
+    controller.Kp = 6*[0, 0.3, 2, 0, 0, 0]';
 
 elseif (movementType == 'y')
-    controller.Kp = 1*diag([0.75, 0, 0.25, 1, 1, 1]);       % tr (x, y, z), orie (x, y, z)
+%     controller.Kp = 1*diag([0.75, 0, 0.25, 1, 1, 1]);       % tr (x, y, z), orie (x, y, z)
+    controller.Kp = 6*[0.3, 0, 2, 0, 0, 0]';
 end
 
 % controller.Ki = 0.005* diag([0.5, 2, 2, 1, 0.1, 1]);
 % controller.Ki = 0 * eye(6);
 % controller.Ki = 0*0.04*0.01*[8, 4, 8, 2, 4, 4]';
-controller.Ki = 0.001*[0.01, 0.01, 0.01, 0.01, 0, 0];
+controller.Ki = 0.01*[0, 0.01, 0.01, 0.01, 0, 0];
 Incontroller.Kp = 0.1*diag([0.1, 0.1, 0.1, 0.1]);
 Incontroller.Ki = 0.2*Incontroller.Kp;
 
 %%
 setControlMode(s, "position");
+
 %%
-current.pose = [320;0;150]/1000;
+current.pose = [240;0;210]/1000;
 Q       = InverseKinematicsGeneric(current.pose);
+
 motorQ  = fixAngleToMotorFB(Q);
-GetBackHome(s, numID, motorQ, gripper.openQ, angleError);
+% GetBackHome(s, numID, motorQ, gripper.openQ, angleError);
+GetBackHome(s, numID, motorQ, gripper.openQ, [0,0,0,0]);
+%%
 readMotorFB(s,numID)
 (readMotorFB(s,numID))*180/pi
 %% Testing pose
@@ -181,19 +188,158 @@ trajectory = zeros(3,11);
 % trajectory(3,:) = linspace(Pi(3),Pe(3),11);
 [trajectory, velref, ~,~,thetadotRef,~] = trajectory_generation_ASM4([Pi,Pe], 0, 5);
 velref = double([velref;thetadotRef]);
-%%
-J =[];J_inv = []; 
-for i = 1:length(trajectory(1,:))
-    Q = InverseKinematicsGeneric(trajectory(:,i));
-    anotherJ = double(substituteVariable(symsVar.J,Q));
-    J_Mtrx(i).J = [anotherJ(:,1),anotherJ(:,2),anotherJ(:,3),anotherJ(:,4)];
-    try
-        anotherJ_inv(i,:,:) = anotherJ'/(anotherJ *anotherJ');
-        J_inv(i,:,:) = double(anotherJ_inv(i,:,1:4));
-    catch ME
-            J_inv(i,:,:) = double(substituteVariable(symsVar.J_inv(:,1:4),Q));
+%% add path for it to pick up things
+
+    tmpID = 1;      % motor id
+    Kp = 7; Ki = 3; Kd = 1;
+    setPID(s, tmpID, Kp, Ki, Kd)
+    setPID(s, 2, 7, 3, 0)       % motor 2
+    setPID(s, 3, 5, 1, 0)       % motor 3
+    setPID(s, 4, 5, 4, 0)       % motor 4
+    setPID(s, 5, 5, 1, 0)
+
+load trajectory_task2_asm.mat
+ctlfeedback.motor.Q    = [];
+ctlfeedback.ref.Q      = [];
+ctlfeedback.pose       = [];
+gripper.Q       = gripper.openQ; % as default
+for i = 1:2
+    
+    if (i == 1)
+        ref = trajectory.path1;
+        N   = length(trajectory.path1(1,:));
+    elseif (i == 2)
+        ref = trajectory.path2;
+        N   = length(trajectory.path2(1,:));
     end
-            inv_Mtrx(i).JI = [J_inv(i,:,1);J_inv(i,:,2);J_inv(i,:,3);J_inv(i,:,4)];
+    
+%     plot3(ref.poseRef(1,:),ref.poseRef(2,:),ref.poseRef(3,:),'-o','Color','r');
+    for j = 1:N
+%         Visualization_pose(ref.poseRef(:,j));
+        r       = (ref(:,j));
+        Q       = InverseKinematicsGeneric(r);
+        motorQ  = fixAngleToMotorFB(Q);
+        fprintf("At i, j: %d, %d",i,j);
+        fprintf("Ref angle: \n");
+        Q
+        sendJointPos(s,[motorQ+angleError,gripper.Q], numID);
+        pause(0.001);
+        fprintf("Motor angle: \n");fb = readMotorFB(s,numID);
+        fixAngleFromMotorFB(fb)
+        
+        % ______ print result for debugging _____
+
+        ctlfeedback.ref.Q(:,j)     = Q';
+        ctlfeedback.motor.Q(:,j) = fixAngleFromMotorFB(fb)'
+%         ctlfeedback.pose(:,j) = double(substituteVariable(symsVar.r_E,ctlfeedback.motor.Q(:,j)));
+    end
+    pause(2);
+    if (i == 1)
+            closeGripper(s,gripper.openQ,gripper.closeQ, fb, numID);
+            gripper.Q = gripper.closeQ;
+    end
+pause(3);
+    end
+
+
+%%
+feedback = [];
+[Jv, r_4] = Jacobian_Matrix_3DOF_ASM4();
+invJv = simplify(inv(Jv));
+fb = fixAngleFromMotorFB(readMotorFB(s,numID));
+feedback(1,:) = fb(1:3);
+fb = fixAngleFromMotorFB(readMotorFB(s,numID));
+feedback(2,:) = fb(1:3);
+fb               = fixAngleFromMotorFB(readMotorFB(s,numID));
+feedback(3,:) = [feedback(2,1)+feedback(1,1)+fb(1),...
+                                    feedback(1,2)+feedback(2,2)+fb(2),...
+                                    feedback(1,3)+feedback(2,3)+fb(3)]/3;
+                                
+%%
+setControlMode(s, "position");
+%% X and Y path
+time = tic;
+plotP.Pose.ref =[]; plotP.Pose.cur = [];
+refPose          = getPose(feedback(end,:));
+setControlMode(s, "velocity");
+for i = 1:100000000000000000
+    newfb                   = fixAngleFromMotorFB(readMotorFB(s,numID));
+    feedback(end+1,:) = [feedback(end-1,1)+feedback(end,1)+newfb(1),...
+                                    feedback(end-1,2)+feedback(end,2)+newfb(2),...
+                                    feedback(end-1,3)+feedback(end,3)+newfb(3)]/3;
+%     x_ref_dot = zeros(3,1);
+    currentPose = getPose(feedback(end,:));
+    error = refPose - currentPose;
+    Xc_dot = [error(1)*controller.Kp(1),error(2)*controller.Kp(2),error(3)*controller.Kp(3)];
+%     invJ = subsVar_3DOF(invJv,feedback(end,:));
+
+    
+
+    Q_dot = inverseJ(feedback(end,:),Xc_dot);
+    sendJointVel(s, [Q_dot', 0, 0], numID);
+    dt = toc(time); time = tic;
+    
+    % ------ DEBUG ---------
+    plotP.Pose.ref(end+1,:) = refPose';plotP.Pose.cur(end+1,:) = currentPose';
+    fprintf("====================");
+    fprintf("Current pose: ");currentPose'
+    fprintf("Qc_dot: "); Q_dot*180/pi
+    dt
+    fprintf("====================");
+
+end
+
+%% Diagonal path
+time = tic;
+plotP.Pose.ref =[]; plotP.Pose.cur = [];
+refPose          = getPose(feedback(end,:));
+refPose_diag = [refPose(1)*cos(pi/4) - sin(pi/4)*refPose(2);...
+                                    refPose(1)*sin(pi/4) + cos(pi/4)*refPose(2);...
+                                    refPose(3)];
+setControlMode(s, "velocity");
+for i = 1:100000000000000000
+    newfb                   = fixAngleFromMotorFB(readMotorFB(s,numID));
+    feedback(end+1,:) = [feedback(end-1,1)+feedback(end,1)+newfb(1),...
+                                    feedback(end-1,2)+feedback(end,2)+newfb(2),...
+                                    feedback(end-1,3)+feedback(end,3)+newfb(3)]/3;
+%     x_ref_dot = zeros(3,1);
+    currentPose = getPose(feedback(end,:));
+    
+    currentPose_diag = [currentPose(1)*cos(pi/4) - sin(pi/4)*currentPose(2);...
+                                    currentPose(1)*sin(pi/4) + cos(pi/4)*currentPose(2);...
+                                    currentPose(3)];
+    
+    
+    error = refPose_diag - currentPose_diag;
+%     error = [ sqrt(error(1)^2+error(2)^2);0;error(3)];
+    Xc_dot = [error(1)*controller.Kp(1),error(2)*controller.Kp(2),error(3)*controller.Kp(3)];
+%     invJ = subsVar_3DOF(invJv,feedback(end,:));
+
+%     Xc_dot_diag = rotateForDiagonal(Xc_dot)
+%     Xc_dot_diag   = [-Xc_dot(2)*cos(pi/4), Xc_dot(2)*cos(pi/4), Xc_dot(3)];
+
+    Q_dot = inverseJ(feedback(end,:),Xc_dot);
+    sendJointVel(s, [Q_dot', 0, 0], numID);
+    dt = toc(time); time = tic;
+    
+    % ------ DEBUG ---------
+    plotP.Pose.ref(end+1,:) = refPose';plotP.Pose.cur(end+1,:) = currentPose';
+    fprintf("====================");
+    fprintf("Current pose: ");currentPose'
+    fprintf("Qc_dot: "); Q_dot*180/pi
+    dt
+    fprintf("====================");
+
+end
+
+%%
+for i = 1:3
+subplot(3,1,i);
+    a = plotP.Pose.cur(:,i);
+    b = plotP.Pose.ref(:,i);
+    plot(a,'-','color','r','LineWidth',1.5);hold on
+    plot(b,'-','color','b','LineWidth',1.5);
+
 end
 %%
 % main script
@@ -206,7 +352,7 @@ Kp = controller.Kp;
 plotPose.pose   = zeros(3,20);plotPose.poseError = zeros(3,20);
 plotPose.velCmd = [];
 plotPose.Q      = zeros(4,20);
-setControlMode(s, "velocity");
+
 previousError = zeros(6,1);
 counter = 0;
 QerrorPrev      = 0;
@@ -215,24 +361,26 @@ plotPose.in.Qerror = zeros(4,20);Q_dotCmd = zeros(4,1);
 plotPose.orErr = zeros(3,20);plotPose.poseRef = [];
 
 % while (counter < 200)
-    N=5;
-    for j = 1:length(trajectory(1,:))
-        if (j ~= 1)
-            refPose = trajectory(:,j);
-        end
+    N=10;
+%     for j = 1:length(trajectory(1,:))
+setControlMode(s, "velocity");
+    while (counter < 1000)
+%         if (j ~= 1)
+%             refPose = trajectory(:,j);
+%         end
         tic;
         for i = 1:N
         % motion planning
         feedbackQ = fixAngleFromMotorFB(readMotorFB(s,numID));
         currentPose = substituteVariable(symsVar.r_E,feedbackQ);
         fprintf("Current pose: ");currentPose
-        feedback.RMtrx = substituteVariable(symsVar.T_Eto0(1:3,1:3),feedbackQ);
+%         feedback.RMtrx = substituteVariable(symsVar.T_Eto0(1:3,1:3),feedbackQ);
 
         % gen the x_ref_dot
         dt_refPoint          = toc; tic;
         %     x_ref_dot            = solveforInstantVel(currentPose,refPose,[0,0,0],[0,0,0],0,dt);
-%         x_ref_dot = zeros(6,1);
-        x_ref_dot = velref(:,j);
+        x_ref_dot = zeros(3,1);
+%         x_ref_dot = velref(:,j);
 
         % get the error in pose
         poseError = refPose - currentPose;
@@ -240,12 +388,12 @@ plotPose.orErr = zeros(3,20);plotPose.poseRef = [];
         plotPose.poseError(:,(j-1)*N+i) = poseError;
         fprintf("Pose error:");poseError'
         % get orientation error
-        ref.Xe = [1,0,0]';
-        ref.Ye = [0,-1,0]';
-        ref.Ze = [0,0,-1]';
-        [feedback.Xe, feedback.Ye, feedback.Ze] = GetOrientation(feedback.RMtrx);
-        orError = getOrientationError(ref,feedback);
-        plotPose.orErr(:,(j-1)*N+i) = orError;
+%         ref.Xe = [1,0,0]';
+%         ref.Ye = [0,-1,0]';
+%         ref.Ze = [0,0,-1]';
+%         [feedback.Xe, feedback.Ye, feedback.Ze] = GetOrientation(feedback.RMtrx);
+%         orError = getOrientationError(ref,feedback);
+%         plotPose.orErr(:,(j-1)*N+i) = orError;
         % plot
         plotPose.pose(:,(j-1)*N+i)   = currentPose;
         plotPose.Q(:,(j-1)*N+i)      = feedbackQ';
@@ -263,8 +411,8 @@ plotPose.orErr = zeros(3,20);plotPose.poseRef = [];
                 controller.Ki(2)*dt_controller/2*(poseError(2) + previousError(2));
             x_cmd_dot(3) =  x_ref_dot(3) + Kp(3)*(poseError(3) - previousError(3)) + ...
                 controller.Ki(3)*dt_controller/2*(poseError(3) + previousError(3));
-            x_cmd_dot(4) =  x_ref_dot(4) + Kp(4)*(orError(1) - previousError(4)) + ...
-                controller.Ki(4)*dt_controller/2*(orError(1) + previousError(4));
+%             x_cmd_dot(4) =  x_ref_dot(4) + Kp(4)*(orError(1) - previousError(4)) + ...
+%                 controller.Ki(4)*dt_controller/2*(orError(1) + previousError(4));
     %         x_cmd_dot(5) =  x_ref_dot(5) + Kp(5)*(orError(2) - previousError(5)) + ...
     %             controller.Ki(5)*dt_controller/2*(orError(2) + previousError(5));
     %         x_cmd_dot(6) =  x_ref_dot(6) + Kp(6)*(orError(3) - previousError(6)) + ...
@@ -273,8 +421,8 @@ plotPose.orErr = zeros(3,20);plotPose.poseRef = [];
 
 
             % convert to Q_cmd_dot
-%             controller.JMtrx = double(substituteVariable(symsVar.J,feedbackQ));
-    %         invJMtrx         = controller.JMtrx'/(controller.JMtrx*controller.JMtrx');
+            controller.JMtrx = double(substituteVariable(symsVar.J(1:3,:),feedbackQ));
+            invJMtrx         = controller.JMtrx'/(controller.JMtrx*controller.JMtrx');
             fprintf("Current angle: ");feedbackQ
 %             try
 %                 invJMtrx = substituteVariable(symsVar.J_inv(:,1:4),feedbackQ);
@@ -283,7 +431,8 @@ plotPose.orErr = zeros(3,20);plotPose.poseRef = [];
 %                 invJMtrx = invJMtrx(:,1:4);
 %             end
             Q_cmd_dot_prev = Q_cmd_dot;
-            Q_cmd_dot        = double(inv_Mtrx(j).JI)*round(double(x_cmd_dot'),5);
+%             Q_cmd_dot        = double(inv_Mtrx(j).JI)*round(double(x_cmd_dot'),5);
+            Q_cmd_dot        = invJMtrx*round(double(x_cmd_dot'),5);
             Q_cmd_dot_motor  = fixVelMotor(double(Q_cmd_dot));
             fprintf("Q cmd dot");Q_cmd_dot'
 
@@ -338,8 +487,8 @@ figure(2);
 for i = 1:4
     subplot(4,1,i);
     
-        plot(Q(i)*ones(size(plotPose.Q(i,:))),'-','color','r','LineWidth',1);hold on
-        plot(plotPose.Q(i,:),'-','color','b','LineWidth',1);
+        plotP(Q(i)*ones(size(plotPose.Q(i,:))),'-','color','r','LineWidth',1);hold on
+        plotP(plotPose.Q(i,:),'-','color','b','LineWidth',1);
         title("Q vs Q_ref ");
     
 end
@@ -348,8 +497,8 @@ figure(3);
 for i = 1:3
     subplot(3,1,i);
     
-        plot(plotPose.poseRef(i,:),'-','color','r','LineWidth',1);hold on
-        plot(plotPose.pose(i,:),'-','color','b','LineWidth',1);
+        plotP(plotPose.poseRef(i,:),'-','color','r','LineWidth',1);hold on
+        plotP(plotPose.pose(i,:),'-','color','b','LineWidth',1);
         
     
 end
@@ -358,7 +507,7 @@ title("Pose in time");
 figure(4);
 for i = 1:3
     subplot(3,1,i);
-    plot(plotPose.poseError(i,:),'-','LineWidth',2);
+    plotP(plotPose.poseError(i,:),'-','LineWidth',2);
     
 end
 title("Pose error");
@@ -367,7 +516,7 @@ figure(5);
 for i = 1:4
     subplot(4,1,i);
     
-        plot(plotPose.velCmd(i,:),'-','LineWidth',2);
+        plotP(plotPose.velCmd(i,:),'-','LineWidth',2);
         
     
 end
@@ -377,7 +526,7 @@ figure(5);
 for i = 1:4
     subplot(4,1,i);
     
-        plot(plotPose.in.Qerror(i,:),'-','LineWidth',2);
+        plotP(plotPose.in.Qerror(i,:),'-','LineWidth',2);
         
 end
 title("Qerror ");
@@ -385,7 +534,7 @@ title("Qerror ");
 
 for i = 1:3
     subplot(3,1,i);
-    plot(plotPose.orErr(i,:),'-','LineWidth',2);
+    plotP(plotPose.orErr(i,:),'-','LineWidth',2);
     
 end
 title("or error");
@@ -537,6 +686,8 @@ value = double(subs(symVariable, [d1,d2,d3,d4,Q1,Q2,Q3,Q4], [D1,D2,D3,D4,q1,q2,q
 
 end
 
+
+
 function [x,y,z]= GetOrientation(R)
 x = R(1:3,1);
 y = R(1:3,2);
@@ -570,11 +721,7 @@ newAngle(1) = -angle(1);
 newAngle(2:4) = angle(2:4) + offset;
 end
 
-function newVel = fixVelMotor(vel)
-newVel = vel;
-newVel(1) = -vel(1);
 
-end
 
 function feedback = readMotorFB(s,numID)
 % Read motor position feedback
@@ -621,4 +768,35 @@ for i = linspace(openQ,closeQ,10)
 end
 end
 
+function Q_dot = inverseJ(Q,xc)
+[d1,d2,d3,d4] =  RobotSpec_Assembly();
 
+Q1 = Q(1);
+Q2 = Q(2);
+Q3 = Q(3);
+
+Q_dot = [-1*(-sin(Q1)/(d3*cos(Q2 + Q3) + d2*cos(Q2))*xc(1) + cos(Q1)/(d3*cos(Q2 + Q3) + d2*cos(Q2))*xc(2) + xc(3)*0);...
+             (cos(Q2 + Q3)*cos(Q1))/(d2*sin(Q3))*xc(1) + xc(2) * (cos(Q2 + Q3)*sin(Q1))/(d2*sin(Q3)) + xc(3) *  sin(Q2 + Q3)/(d2*sin(Q3));...
+             xc(1)*-(cos(Q1)*(d3*cos(Q2 + Q3) + d2*cos(Q2)))/(d2*d3*sin(Q3)) + xc(2) * -(sin(Q1)*(d3*cos(Q2 + Q3) + d2*cos(Q2)))/(d2*d3*sin(Q3)) + xc(3) * -(d3*sin(Q2 + Q3) + d2*sin(Q2))/(d2*d3*sin(Q3))];
+
+end
+
+function r = getPose(Q)
+[d1,d2,d3,d4] =  RobotSpec_Assembly();
+
+Q1 = Q(1);
+Q2 = Q(2);
+Q3 = Q(3);
+
+r = [cos(Q1)*(d3*cos(Q2 + Q3) + d2*cos(Q2));...
+     sin(Q1)*(d3*cos(Q2 + Q3) + d2*cos(Q2));...
+     d1 + d3*sin(Q2 + Q3) + d2*sin(Q2)];
+end
+
+function rot_xc =  rotateForDiagonal(xc)
+
+rot_xc(1) = xc(1)*cos(pi/4) -xc(2)*sin(pi/4) ;
+rot_xc(2) = (xc(1)+xc(2))*cos(pi/4);
+rot_xc(3) = xc(3);
+
+end

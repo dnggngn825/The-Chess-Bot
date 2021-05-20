@@ -118,8 +118,8 @@ Q           = InverseKinematicsGeneric([300;0;310]/1000);
 homeMotorQ  = fixAngleToMotorFB(Q);
 
 % define the angle of the grippper
-gripper.closeQ  = 0.59;
-gripper.openQ   = -0.67;
+gripper.closeQ  = 0.7;
+gripper.openQ   = -0.24;
 gripper.Q       = gripper.openQ; % as default
 
 %%

@@ -22,10 +22,9 @@ port = 'COM5';                                % Windows Port Structure - ONLY EX
 
 % Setup Serial Connection
 baudrate = 230400;
-% fclose(s);
+fclose(s);
 s = establishSerial(port, baudrate);
 % s = serialport(port, baudrate);
-
 % Read Connected Motor IDs
 [numID, ID] = getMotorIDs(s)
 % setControlMode(s, "velocity");
@@ -57,7 +56,9 @@ syms d1 d2 d3 d4 Q1 Q2 Q3 Q4 real;
 % Set motor EPROM to position control mode
 setControlMode(s, "position");
 %%
-sendJointPos(s,[0, 0, pi/4],numID);
+% sendJointPos(s,[0, 0, pi/4],numID);
+sendJointPos(s,[0, -pi/3, -pi/4],3);
+
 
 % sendJointPos(s,[0,gripper.openQ], 2);
 %%
@@ -100,12 +101,12 @@ Q           = InverseKinematicsGeneric([300;0;310]/1000);
 homeMotorQ  = fixAngleToMotorFB(Q);
 
 % define the angle of the grippper
-gripper.closeQ  = 0.58;
-gripper.openQ   = -0.65;
+gripper.closeQ  = 0.7;
+gripper.openQ   = -0.24;
 gripper.Q       = gripper.openQ; % as default
 
 %%
-GetBackHome(s, numID, homeMotorQ,gripper.closeQ, angleError);
+GetBackHome(s, numID, homeMotorQ,gripper.openQ, angleError);
 angle = [homeMotorQ+angleError,gripper.openQ];
 % sendJointPos(s,angle, numID);
 
@@ -196,7 +197,7 @@ load trajectory_task1_asm4.mat
 %%
 % This is where you will write the majority of your code for part 2 of the project.
 % get the data to control by edit the moveID
-moveID      = 13;
+moveID      = 5;
 trajectory = trajectoryStruct.traj(moveID);
 %%
 feedback.motor.Q    = [];
@@ -208,7 +209,7 @@ for i = 1:2
     ref = trajectory.segment(i);
 %     plot3(ref.poseRef(1,:),ref.poseRef(2,:),ref.poseRef(3,:),'-o','Color','r');
     for j = 1:N
-%         Visualization_pose(ref.poseRef(:,j));
+%         Visualization_pose(ref.poseRef(:,j));0.06500000000000000.0650000000000000
         r       = (ref.poseRef(:,j));
         Q       = InverseKinematicsGeneric(r);
         motorQ  = fixAngleToMotorFB(Q);

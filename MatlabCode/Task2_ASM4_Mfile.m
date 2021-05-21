@@ -147,7 +147,7 @@ readMotorFB(s,numID)
 %%
 
 % Task space velocity controller
-movementType = 'x';
+movementType = 'y';
 if (movementType == 'x')
 %     controller.Kp = 0.02*diag([2, 5, 2, 10, 25, 10]) ;      % tr (x, y, z), orie (x, y, z)
 %         controller.Kp = 0.04*diag([0, 5, 0, 0, 25, 10]) ; controller.Ki = 0.3*controller.Kp;        % stable but easily pose to disturbances

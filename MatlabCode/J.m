@@ -56,6 +56,9 @@ syms d1 d2 d3 d4 Q1 Q2 Q3 Q4 real;
 % Set motor EPROM to position control mode
 setControlMode(s, "position");
 %%
+setControlMode(s, "velocity");
+
+%%
 % sendJointPos(s,[0, 0, pi/4],numID);
 sendJointPos(s,[0, -pi/3, -pi/4],3);
 
@@ -128,63 +131,63 @@ end
 
 %%
 % Set Motor internal PID controller. Gains must be integers.
-if (moveID ==1)
-    tmpID = 1;      % motor id
-    Kp = 7; Ki = 3; Kd = 1;
-    setPID(s, tmpID, Kp, Ki, Kd)
-    setPID(s, 2, 10, 3, 0)       % motor 2
-    setPID(s, 3, 5, 1, 0)       % motor 3
-    setPID(s, 4, 5, 4, 0)       % motor 4
-    setPID(s, 5, 5, 1, 0)
-elseif (moveID ==2)
-    tmpID = 1;      % motor id
-    Kp = 7; Ki = 3; Kd = 2;
-    setPID(s, tmpID, Kp, Ki, Kd)
-    setPID(s, 2, 7, 2, 0.1)       % motor 2
-    setPID(s, 3, 7, 1, 0.1)       % motor 3
-    setPID(s, 4, 10, 2, 0.1)       % motor 4
-    setPID(s, 5, 10, 1, 0)
-elseif (moveID == 3)
-    tmpID = 1;      % motor id
-    Kp = 7; Ki = 3; Kd = 1;
-    setPID(s, tmpID, Kp, Ki, Kd)
-    setPID(s, 2, 7, 2.5, 1)       % motor 2
-    setPID(s, 3, 7, 1, 0.1)       % motor 3
-    setPID(s, 4, 5, 3, 0.5)       % motor 4
-    setPID(s, 5, 10, 1, 0)
-elseif (moveID == 4)
-    tmpID = 1;      % motor id
-    Kp = 7; Ki = 3; Kd = 1;
-    setPID(s, tmpID, Kp, Ki, Kd)
-    setPID(s, 2, 8, 2.5, 1)       % motor 2
-    setPID(s, 3, 8, .5, 1)       % motor 3
-    setPID(s, 4, 4, 4, 0.5)       % motor 4
-    setPID(s, 5, 10, 1, 0)
-elseif (moveID == 5) % need to fix
-    tmpID = 1;      % motor id
-    Kp = 7; Ki = 7; Kd = 1;
-    setPID(s, tmpID, Kp, Ki, Kd)
-    setPID(s, 2, 7, 2.5, 1)       % motor 2
-    setPID(s, 3, 7 ,.5, 1)       % motor 3
-    setPID(s, 4, 4, 4, 0.5)       % motor 4
-    setPID(s, 5, 10, 1, 0)
-elseif (moveID == 6)% not done yet
-    tmpID = 1;      % motor id
-    Kp = 7; Ki = 7; Kd = 1;
-    setPID(s, tmpID, Kp, Ki, Kd)
-    setPID(s, 2, 7, 5, .5)       % motor 2
-    setPID(s, 3, 5 ,2, .5)       % motor 3
-    setPID(s, 4, 4, 4, 0.5)       % motor 4
-    setPID(s, 5, 5, 5, 0)
-elseif (moveID == 7)% not done yet
-    tmpID = 1;      % motor id
-    Kp = 7; Ki = 7; Kd = 1;
-    setPID(s, tmpID, Kp, Ki, Kd)
-    setPID(s, 2, 7, 5, .5)       % motor 2
-    setPID(s, 3, 6,2, .5)       % motor 3
-    setPID(s, 4, 4, 4, 0.5)       % motor 4
-    setPID(s, 5, 10, 1, 0)
-end
+% if (moveID ==1)
+%     tmpID = 1;      % motor id
+%     Kp = 7; Ki = 3; Kd = 1;
+%     setPID(s, tmpID, Kp, Ki, Kd)
+%     setPID(s, 2, 10, 3, 0)       % motor 2
+%     setPID(s, 3, 5, 1, 0)       % motor 3
+%     setPID(s, 4, 5, 4, 0)       % motor 4
+%     setPID(s, 5, 5, 1, 0)
+% elseif (moveID ==2)
+%     tmpID = 1;      % motor id
+%     Kp = 7; Ki = 3; Kd = 2;
+%     setPID(s, tmpID, Kp, Ki, Kd)
+%     setPID(s, 2, 7, 2, 0.1)       % motor 2
+%     setPID(s, 3, 7, 1, 0.1)       % motor 3
+%     setPID(s, 4, 10, 2, 0.1)       % motor 4
+%     setPID(s, 5, 10, 1, 0)
+% elseif (moveID == 3)
+%     tmpID = 1;      % motor id
+%     Kp = 7; Ki = 3; Kd = 1;
+%     setPID(s, tmpID, Kp, Ki, Kd)
+%     setPID(s, 2, 7, 2.5, 1)       % motor 2
+%     setPID(s, 3, 7, 1, 0.1)       % motor 3
+%     setPID(s, 4, 5, 3, 0.5)       % motor 4
+%     setPID(s, 5, 10, 1, 0)
+% elseif (moveID == 4)
+%     tmpID = 1;      % motor id
+%     Kp = 7; Ki = 3; Kd = 1;
+%     setPID(s, tmpID, Kp, Ki, Kd)
+%     setPID(s, 2, 8, 2.5, 1)       % motor 2
+%     setPID(s, 3, 8, .5, 1)       % motor 3
+%     setPID(s, 4, 4, 4, 0.5)       % motor 4
+%     setPID(s, 5, 10, 1, 0)
+% elseif (moveID == 5) % need to fix
+%     tmpID = 1;      % motor id
+%     Kp = 7; Ki = 7; Kd = 1;
+%     setPID(s, tmpID, Kp, Ki, Kd)
+%     setPID(s, 2, 7, 2.5, 1)       % motor 2
+%     setPID(s, 3, 7 ,.5, 1)       % motor 3
+%     setPID(s, 4, 4, 4, 0.5)       % motor 4
+%     setPID(s, 5, 10, 1, 0)
+% elseif (moveID == 6)% not done yet
+%     tmpID = 1;      % motor id
+%     Kp = 7; Ki = 7; Kd = 1;
+%     setPID(s, tmpID, Kp, Ki, Kd)
+%     setPID(s, 2, 7, 5, .5)       % motor 2
+%     setPID(s, 3, 5 ,2, .5)       % motor 3
+%     setPID(s, 4, 4, 4, 0.5)       % motor 4
+%     setPID(s, 5, 5, 5, 0)
+% elseif (moveID == 7)% not done yet
+%     tmpID = 1;      % motor id
+%     Kp = 7; Ki = 7; Kd = 1;
+%     setPID(s, tmpID, Kp, Ki, Kd)
+%     setPID(s, 2, 7, 5, .5)       % motor 2
+%     setPID(s, 3, 6,2, .5)       % motor 3
+%     setPID(s, 4, 4, 4, 0.5)       % motor 4
+%     setPID(s, 5, 10, 1, 0)
+% end
 
 %% general PID tune for all cases
 setPID(s, 1, 7, 7, 1)       % motor 1
@@ -197,17 +200,17 @@ load trajectory_task1_asm4.mat
 %%
 % This is where you will write the majority of your code for part 2 of the project.
 % get the data to control by edit the moveID
-moveID      = 5;
+moveID      = 9; % 6,
 trajectory = trajectoryStruct.traj(moveID);
 %%
 feedback.motor.Q    = [];
 feedback.ref.Q      = [];
 feedback.pose       = [];
 gripper.Q       = gripper.openQ; % as default
-for i = 1:2
+for i = 1:3
     N   = length(trajectory.segment(i).poseRef(1,:));
     ref = trajectory.segment(i);
-%     plot3(ref.poseRef(1,:),ref.poseRef(2,:),ref.poseRef(3,:),'-o','Color','r');
+%     plot3(ref.poseRef(1,:),ref.poseRe f(2,:),ref.poseRef(3,:),'-o','Color','r');
     for j = 1:N
 %         Visualization_pose(ref.poseRef(:,j));0.06500000000000000.0650000000000000
         r       = (ref.poseRef(:,j));
